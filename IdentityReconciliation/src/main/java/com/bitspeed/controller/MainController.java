@@ -1,18 +1,14 @@
 package com.bitspeed.controller;
 
-import java.util.List;
-import java.util.stream.Stream;
-
+import com.bitspeed.model.UserContactSummary;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.bitspeed.model.Contact;
 import com.bitspeed.model.IdentifyRequest;
-import com.bitspeed.model.UserSummary;
 import com.bitspeed.service.ContactService;
 
 @RestController
@@ -22,9 +18,14 @@ public class MainController {
 	ContactService contactService;
 	
 	@PostMapping("/identify")
-	public UserSummary identifyUser(@RequestBody IdentifyRequest request) {
-		return contactService.makeSummary(request.getEmail(), request.getPhoneNumber().toString());
-		
+	public UserContactSummary identifyUser(@RequestBody IdentifyRequest request) {
+		if(request.getPhoneNumber() == null){
+			return contactService.createSummaryOnlyWithEmail(request.getEmail());
+		}
+		else if(request.getEmail() == null)
+			return contactService.createSummaryOnlyWithNumber(request.getPhoneNumber());
+
+		return contactService.createSummaryOnlyWithNumber(request.getPhoneNumber());
 	}
 
 	@PostMapping("/addUser")

@@ -1,18 +1,20 @@
 package com.bitspeed.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.bitspeed.model.IdentifyRequest;
+import com.bitspeed.model.UserContactSummary;
+import jakarta.annotation.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.bitspeed.model.Contact;
-import com.bitspeed.model.UserSummary;
 import com.bitspeed.repository.ContactRepository;
 
 @Service
@@ -62,37 +64,7 @@ public class ContactService {
 		return new ResponseEntity<>("New Secondary User Created Successfully",HttpStatus.CREATED);
 	}
 	
-	public UserSummary makeSummary(String email, String phoneNumber) {
-		List<Contact> eContacts = contactRepository.findByEmail(email);
-		List<Contact> pContacts = contactRepository.findByPhoneNumber(phoneNumber);
-		
-		long eContactCount = eContacts.stream().count();
-		long pContactCount = pContacts.stream().count();
-		
-		 List<Contact> result = eContactCount > pContactCount ? eContacts : pContacts;
-		 
-		 Stream<Object> primaryContactId = result.stream()
-				 .filter(r ->r.getLinkPrecedence().equals("primary"))
-				 .map(r -> r.getId());
-		 
-		 Stream<Object> rEmail =  result.stream().map(r -> r.getEmail());
-		 
-		 Stream<String> rPhoneNumber = result.stream()
-				 .map(r -> r.getPhoneNumber()).distinct();
-		 
-		 Stream<Object> rSecondaryContactId = result.stream()
-				 .filter(r ->r.getLinkPrecedence().equals("secondary"))
-				 .map(r -> r.getId());
-		 
-		 UserSummary summary = new UserSummary(
-				 primaryContactId.findFirst().get(),
-				 rEmail.toList(),
-				 rPhoneNumber.toList(),
-				 rSecondaryContactId.findFirst().get()
-				 );
-		 return summary;
-		 
-	}
+
 	public void primaryToSecondary(List<Contact> eContacts, List<Contact> pContacts){
 		LocalDateTime eCreatedAt = eContacts.stream()
 				.filter(r->r.getLinkPrecedence().equals("primary"))
@@ -127,5 +99,104 @@ public class ContactService {
 		contactRepository.save(contact);
 		return contact;
 	}
+
+	public UserContactSummary createSummaryOnlyWithEmail(String email){
+
+		List<Contact> eContacts = contactRepository.findByEmail(email);
+		Contact primaryContact =null;
+		Boolean isPrimary=false;
+		int primaryId;
+
+		for(Contact c: eContacts){
+			if(c.getLinkPrecedence().equals("primary")){
+				primaryContact = c;
+				isPrimary = true;
+			}
+		}
+
+		if(isPrimary) {
+			primaryId = eContacts.stream()
+					.map(r -> r.getId()).findFirst().get();
+		}
+		else{
+			primaryId = eContacts.stream()
+					.map(r->r.getLinkedId()).findFirst().get();
+		}
+
+		List<Contact> secondaryContacts = contactRepository.findByLinkedId(primaryId);
+		primaryContact = (primaryContact == null)?contactRepository.findById(primaryId).get():primaryContact;
+		//primaryContact = contactRepository.findById(primaryId).get();
+
+		List<String> phoneNumberList = new ArrayList<>();
+		phoneNumberList.add(primaryContact.getPhoneNumber());
+		for (Contact c:secondaryContacts) {
+			phoneNumberList.add(c.getPhoneNumber());
+		}
+		phoneNumberList = phoneNumberList.stream().distinct().toList();
+
+		List<String> emailList =new ArrayList<>();
+		emailList.add(primaryContact.getEmail());
+		for (Contact c:secondaryContacts) {
+			emailList.add(c.getEmail());
+		}
+		emailList = emailList.stream().distinct().toList();
+
+		List<Integer> secondaryContactsId = new ArrayList<>();
+		for (Contact c:secondaryContacts) {
+			secondaryContactsId.add(c.getId());
+		}
+
+		return new UserContactSummary(primaryId,emailList,phoneNumberList,secondaryContactsId);
+	}
+
+	public UserContactSummary createSummaryOnlyWithNumber(String phoneNumber){
+
+		List<Contact> eContacts = contactRepository.findByPhoneNumber(phoneNumber);
+		Contact primaryContact =null;
+		Boolean isPrimary=false;
+		int primaryId;
+
+		for(Contact c: eContacts){
+			if(c.getLinkPrecedence().equals("primary")){
+				primaryContact = c;
+				isPrimary = true;
+			}
+		}
+
+		if(isPrimary) {
+			primaryId = eContacts.stream()
+					.map(r -> r.getId()).findFirst().get();
+		}
+		else{
+			primaryId = eContacts.stream()
+					.map(r->r.getLinkedId()).findFirst().get();
+		}
+
+		List<Contact> secondaryContacts = contactRepository.findByLinkedId(primaryId);
+		primaryContact = (primaryContact == null)?contactRepository.findById(primaryId).get():primaryContact;
+		//primaryContact = contactRepository.findById(primaryId).get();
+
+		List<String> phoneNumberList = new ArrayList<>();
+		phoneNumberList.add(primaryContact.getPhoneNumber());
+		for (Contact c:secondaryContacts) {
+			phoneNumberList.add(c.getPhoneNumber());
+		}
+		phoneNumberList = phoneNumberList.stream().distinct().toList();
+
+		List<String> emailList =new ArrayList<>();
+		emailList.add(primaryContact.getEmail());
+		for (Contact c:secondaryContacts) {
+			emailList.add(c.getEmail());
+		}
+		emailList = emailList.stream().distinct().toList();
+
+		List<Integer> secondaryContactsId = new ArrayList<>();
+		for (Contact c:secondaryContacts) {
+			secondaryContactsId.add(c.getId());
+		}
+
+		return new UserContactSummary(primaryId,emailList,phoneNumberList,secondaryContactsId);
+	}
+
 
 }

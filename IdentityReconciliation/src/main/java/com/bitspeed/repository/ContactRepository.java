@@ -15,4 +15,5 @@ public interface ContactRepository extends JpaRepository<Contact, Integer> {
 
 	List<Contact> findByPhoneNumber(String phoneNumber);
 
+    List<Contact> findByLinkedId(int primaryId);
 }

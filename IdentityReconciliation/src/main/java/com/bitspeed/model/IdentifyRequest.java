@@ -1,8 +1,11 @@
 package com.bitspeed.model;
 
+import jakarta.annotation.Nullable;
+
 public class IdentifyRequest {
-	
+	@Nullable
 	private String email;
+	@Nullable
 	private String phoneNumber;
 	public String getEmail() {
 		return email;

@@ -2,10 +2,10 @@ package com.bitspeed.model;
 
 import java.util.List;
 
-public class UserSummary {
+public class UserContactSummary {
 	
 	private Integer primaryContactId;
-	private List<Object> email;
+	private List<String> email;
 	private List<String> phoneNumbers;
 	private List<Integer> secondaryContactIds;
 	public Integer getPrimaryContactId() {
@@ -14,10 +14,10 @@ public class UserSummary {
 	public void setPrimaryContactId(Integer primaryContactId) {
 		this.primaryContactId = primaryContactId;
 	}
-	public List<Object> getEmail() {
+	public List<String> getEmail() {
 		return email;
 	}
-	public void setEmail(List<Object> email) {
+	public void setEmail(List<String> email) {
 		this.email = email;
 	}
 	public List<String> getPhoneNumbers() {
@@ -32,8 +32,8 @@ public class UserSummary {
 	public void setSecondaryContactIds(List<Integer> secondaryContactIds) {
 		this.secondaryContactIds = secondaryContactIds;
 	}
-	public UserSummary(Object object, List<Object> list, List<String> phoneNumbers,
-			Object object2) {
+	public UserContactSummary(Object object, List<String> list, List<String> phoneNumbers,
+							  Object object2) {
 		super();
 		this.primaryContactId = (Integer) object;
 		this.email = list;
@@ -41,12 +41,12 @@ public class UserSummary {
 		this.secondaryContactIds = (List<Integer>) object2;
 	}
 	
-	public UserSummary() {
+	public UserContactSummary() {
 		// TODO Auto-generated constructor stub
 	}
 	@Override
 	public String toString() {
-		return "UserSummary [primaryContactId=" + primaryContactId + ", email=" + email + ", phoneNumbers="
+		return "UserContactSummary [primaryContactId=" + primaryContactId + ", email=" + email + ", phoneNumbers="
 				+ phoneNumbers + ", secondaryContactIds=" + secondaryContactIds + "]";
 	}
 	
