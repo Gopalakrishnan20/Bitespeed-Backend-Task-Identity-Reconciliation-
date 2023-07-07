@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import com.bitspeed.model.Contact;
 import com.bitspeed.model.UserSummary;
 import com.bitspeed.repository.ContactRepository;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Service
 public class ContactService {
@@ -41,12 +40,15 @@ public class ContactService {
 		long eContactCount = eContacts.stream().count();
 		long pContactCount = pContacts.stream().count();
 
+		if(eContactCount != 0 && pContactCount != 0){
+			primaryToSecondary(eContacts,pContacts);
+			return new ResponseEntity<>("Contact Modified",HttpStatus.CREATED);
+		}
+
 		List<Contact> existingContacts = eContactCount > pContactCount ? eContacts : pContacts ;
 
 		Optional<Integer> linkedId = existingContacts.stream().filter(c->c.getLinkPrecedence().equals("primary"))
 				.map(c-> c.getId()).findFirst();
-
-
 
 		Contact finalContact = new Contact(0,
 				request.getPhoneNumber(),
@@ -89,8 +91,41 @@ public class ContactService {
 				 rSecondaryContactId.findFirst().get()
 				 );
 		 return summary;
-		
 		 
+	}
+	public void primaryToSecondary(List<Contact> eContacts, List<Contact> pContacts){
+		LocalDateTime eCreatedAt = eContacts.stream()
+				.filter(r->r.getLinkPrecedence().equals("primary"))
+				.map(r->r.getCreatedAt()).findFirst().get();
+		LocalDateTime pCreatedAt = pContacts.stream()
+				.filter(r->r.getLinkPrecedence().equals("primary"))
+				.map(r->r.getCreatedAt()).findFirst().get();
+
+		if(eCreatedAt.isBefore(pCreatedAt)){
+
+			int id =eContacts.stream()
+					.filter(r->r.getLinkPrecedence().equals("primary"))
+							.map(r->r.getId()).findFirst().get();
+			System.out.println(id);
+			pContacts.stream()
+					.filter(r->r.getLinkPrecedence().equals("primary"))
+					.map(contact -> modify(contact,id)).findFirst();
+		}
+		else {
+			int id =pContacts.stream()
+					.filter(r->r.getLinkPrecedence().equals("primary"))
+					.map(r->r.getId()).findFirst().get();
+			eContacts.stream()
+					.filter(r->r.getLinkPrecedence().equals("primary"))
+					.map(contact -> modify(contact,id)).findFirst();
+		}
+	}
+	private Object modify(Contact contact, int id) {
+		contact.setUpdatedAt(LocalDateTime.now());
+		contact.setLinkPrecedence("secondary");
+		contact.setLinkedId(id);
+		contactRepository.save(contact);
+		return contact;
 	}
 
 }
