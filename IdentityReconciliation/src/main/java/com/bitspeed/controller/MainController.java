@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.bitspeed.model.IdentifyRequest;
 import com.bitspeed.service.ContactService;
 
+import java.net.http.HttpClient;
+
 @RestController
 public class MainController {
 	
@@ -18,14 +20,20 @@ public class MainController {
 	ContactService contactService;
 	
 	@PostMapping("/identify")
-	public UserContactSummary identifyUser(@RequestBody IdentifyRequest request) {
-		if(request.getPhoneNumber() == null){
-			return contactService.createSummaryOnlyWithEmail(request.getEmail());
-		}
-		else if(request.getEmail() == null)
-			return contactService.createSummaryOnlyWithNumber(request.getPhoneNumber());
+	public ResponseEntity<String> identifyUser(@RequestBody IdentifyRequest request) {
 
-		return contactService.createSummaryOnlyWithNumber(request.getPhoneNumber());
+		if(contactService.isContactExist(request)) {
+			if (request.getPhoneNumber() == null) {
+				return ResponseEntity.ok(contactService.createSummaryOnlyWithEmail(request.getEmail()).toString());
+			} else if (request.getEmail() == null)
+				return ResponseEntity.ok(contactService.createSummaryOnlyWithNumber(request.getPhoneNumber()).toString());
+
+			return ResponseEntity.ok(contactService.createSummaryOnlyWithNumber(request.getPhoneNumber()).toString());
+		}
+		else{
+			return addUser(request);
+		}
+
 	}
 
 	@PostMapping("/addUser")

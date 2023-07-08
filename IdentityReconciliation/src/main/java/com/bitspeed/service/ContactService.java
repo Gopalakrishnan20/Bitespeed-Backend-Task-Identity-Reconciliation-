@@ -78,7 +78,6 @@ public class ContactService {
 			int id =eContacts.stream()
 					.filter(r->r.getLinkPrecedence().equals("primary"))
 							.map(r->r.getId()).findFirst().get();
-			System.out.println(id);
 			pContacts.stream()
 					.filter(r->r.getLinkPrecedence().equals("primary"))
 					.map(contact -> modify(contact,id)).findFirst();
@@ -145,7 +144,6 @@ public class ContactService {
 		for (Contact c:secondaryContacts) {
 			secondaryContactsId.add(c.getId());
 		}
-
 		return new UserContactSummary(primaryId,emailList,phoneNumberList,secondaryContactsId);
 	}
 
@@ -196,6 +194,13 @@ public class ContactService {
 		}
 
 		return new UserContactSummary(primaryId,emailList,phoneNumberList,secondaryContactsId);
+	}
+
+	public Boolean isContactExist(IdentifyRequest request){
+		if(contactRepository.findByEmail(request.getEmail()).isEmpty() && contactRepository.findByPhoneNumber(request.getPhoneNumber()).isEmpty()){
+			return true;
+		}
+		return false;
 	}
 
 
