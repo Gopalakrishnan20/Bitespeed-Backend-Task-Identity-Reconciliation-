@@ -1,0 +1,10 @@
+docker run --detach
+ --env MYSQL_ROOT_PASSWORD=admin
+ --env MYSQL_USER=admin
+ --env MYSQL_PASSWORD=admin
+ --env MYSQL_DATABASE=bitspeed
+ --name mysql
+ --publish 3306:3306
+ mysql:8-oracle
+
+\connect bitspeed@localhost:3306
