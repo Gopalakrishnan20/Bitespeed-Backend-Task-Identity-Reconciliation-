@@ -12,6 +12,6 @@ Bitespeed Backend task: Identity Reconciliation, with Spring Boot backend and Sq
 
 (now open localhost:8080/identify and hit post request to this API endpoint)
 
-# Application is deployed in AWS
+# Application is deployed in EC2
 http://35.175.222.17:3000/identify
 (will not be available from 14th July 2023)
