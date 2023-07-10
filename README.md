@@ -11,3 +11,7 @@ Bitespeed Backend task: Identity Reconciliation, with Spring Boot backend and Sq
 3. docker-compose up
 
 (now open localhost:8080/identify and hit post request to this API endpoint)
+
+# Application is deployed in AWS
+http://35.175.222.17:3000/identify
+(will not be available from 14th July 2023)
